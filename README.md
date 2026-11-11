@@ -30,9 +30,20 @@ Plugins must be enabled on the daemon (Settings → Plugins).
 
 ```bash
 npm install
-npm run typecheck
+npm run check
 paseo plugin reload video-player
 ```
+
+## Releasing
+
+Releases are Git tags. Pushing a `vX.Y.Z` tag runs [the release workflow](.github/workflows/release.yml), which re-runs the checks, verifies the tag matches `package.json`, and creates a GitHub release with generated notes and the packed plugin attached.
+
+1. Open a PR that bumps `version` in `package.json` (e.g. `npm version minor --no-git-tag-version`) and merge it.
+2. Tag the merged commit and push the tag: `git tag v0.2.0 && git push origin v0.2.0`.
+
+Tags with a suffix such as `v0.2.0-beta.1` are marked as pre-releases.
+
+Pin an install to a release with `paseo plugin install git:Prithpal-Sooriya/paseo-plugin-video-player --ref v0.1.0`. `paseo plugin update` on a Git install follows the default branch rather than tags, so keep the default branch releasable.
 
 ## License
 

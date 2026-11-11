@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+      - run: npm run check:mobile
+      - run: npm run check:package
+      - name: Tag matches package.json version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+      - name: Pack plugin
+        run: npm pack --ignore-scripts
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$GITHUB_REF_NAME"
+          prerelease=""
+          case "$tag" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$tag" ./*.tgz \
+            --title "$tag" \
+            --generate-notes \
+            --verify-tag \
+            $prerelease \
+            --notes "Install this exact version:
+
+          \`\`\`bash
+          paseo plugin install git:${GITHUB_REPOSITORY} --ref ${tag}
+          \`\`\`"
