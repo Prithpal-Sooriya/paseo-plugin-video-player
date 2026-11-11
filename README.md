@@ -1,49 +1,63 @@
-# Paseo video player
+# 🎬 Video player for Paseo
 
-A [Paseo](https://paseo.sh) plugin that plays video files inside Paseo file tabs instead of showing "Binary preview unavailable".
+Click a video in Paseo and it plays in the tab, with no more **"Binary preview unavailable"**.
 
-![Video player panel](assets/screenshot.png)
+I built this because my automations (a daily digest, explainer videos for PRs) render MP4s, and I wanted to watch them right where the agent made them.
 
-- Formats: `.mp4`, `.m4v`, `.mov`, `.webm`, `.ogv`
-- Desktop and web: HTML5 player with native controls (seek, volume, speed, picture in picture, full screen). Remembers the playback position per tab and reloads when the file changes on disk.
-- iOS and Android: plays through `DocumentFrame` (system WebView).
-- Client-only plugin. No backend, no network calls.
+<p align="center">
+  <img src="assets/screenshot.png" alt="A video playing in a Paseo file tab" width="720" />
+</p>
 
-Requires Paseo 0.13.0 or later.
+## What you get
+
+- ▶️ **Plays in place.** Open an `.mp4`, `.m4v`, `.mov`, `.webm` or `.ogv` from the file explorer and it just plays.
+- 🎛️ **Normal controls.** Seek, volume, speed, picture in picture and full screen.
+- 🔖 **Remembers your spot.** Close the tab, come back later, and pick up where you left off.
+- 🔄 **Follows the file.** If an agent re-renders the video, the tab reloads it and keeps your position.
+- 🔒 **Nothing leaves your machine.** It runs only in the app, with no backend and no network calls.
 
 ## Install
+
+In Paseo, open **Settings → Plugins** and add:
+
+```
+git:Prithpal-Sooriya/paseo-plugin-video-player
+```
+
+Or from a terminal:
 
 ```bash
 paseo plugin install git:Prithpal-Sooriya/paseo-plugin-video-player
 ```
 
-Or from a local checkout:
+You'll need Paseo 0.13 or newer, with plugins turned on in **Settings → Plugins**.
 
-```bash
-git clone https://github.com/Prithpal-Sooriya/paseo-plugin-video-player
-paseo plugin install "$PWD/paseo-plugin-video-player"
-```
+## Good to know
 
-Plugins must be enabled on the daemon (Settings → Plugins).
+- The whole file loads before playback starts, so a big video on a remote host takes a moment to open.
+- H.264 MP4s play everywhere. HEVC, AV1 and some MOV files depend on your operating system.
+- On iOS and Android it uses the system player and doesn't remember your position yet.
 
-## Develop
+## Hacking on it
 
 ```bash
 npm install
-npm run check
-paseo plugin reload video-player
+npm run check                                 # typecheck, mobile safety, package contents
+paseo plugin install "$PWD"                   # install your local copy
+paseo plugin reload video-player              # after each change
 ```
 
-## Releasing
+The plugin is a single [file panel](https://paseo.sh/docs/plugins/reference#file-panels): `client/video-panel.tsx` renders it, and `client/web.ts` mounts the HTML5 `<video>` element on desktop and web.
 
-Releases are Git tags. Pushing a `vX.Y.Z` tag runs [the release workflow](.github/workflows/release.yml), which re-runs the checks, verifies the tag matches `package.json`, and creates a GitHub release with generated notes and the packed plugin attached.
+### Releasing
 
-1. Open a PR that bumps `version` in `package.json` (e.g. `npm version minor --no-git-tag-version`) and merge it.
-2. Tag the merged commit and push the tag: `git tag v0.2.0 && git push origin v0.2.0`.
+Bump the version in a PR (`npm version minor --no-git-tag-version`), merge it, then tag the merged commit:
 
-Tags with a suffix such as `v0.2.0-beta.1` are marked as pre-releases.
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
 
-Pin an install to a release with `paseo plugin install git:Prithpal-Sooriya/paseo-plugin-video-player --ref v0.1.0`. `paseo plugin update` on a Git install follows the default branch rather than tags, so keep the default branch releasable.
+The [release workflow](.github/workflows/release.yml) checks that the tag matches `package.json`, then publishes a GitHub release with notes. A tag like `v0.2.0-beta.1` becomes a pre-release.
 
 ## License
 
