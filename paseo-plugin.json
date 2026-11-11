@@ -1,0 +1,11 @@
+{
+  "id": "video-player",
+  "name": "Video player",
+  "description": "Play MP4, MOV, WebM and other video files inside Paseo file tabs",
+  "media": [
+    "assets/screenshot.png"
+  ],
+  "requirements": {
+    "paseo": ">=0.13.0"
+  }
+}
